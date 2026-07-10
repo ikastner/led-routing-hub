@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LED Routing Hub</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header>
+    <h1>LED Routing Hub</h1>
+    <p class="subtitle">State UDP :6455 → ArtNet :6454 @ 40 Hz</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="dashboard">Dashboard</button>
+    <button class="tab" data-tab="monitor">Moniteur DMX</button>
+    <button class="tab" data-tab="config">Configuration</button>
+  </nav>
+
+  <main>
+    <section id="dashboard" class="panel active">
+      <div class="card">
+        <h2>Moteur</h2>
+        <div class="row">
+          <button id="btn-start">Démarrer</button>
+          <button id="btn-stop" class="danger">Arrêter</button>
+          <button id="btn-blackout" class="warn">Blackout</button>
+        </div>
+        <label class="checkbox"><input type="checkbox" id="dry-run" /> Dry-run ArtNet</label>
+        <pre id="status-box">Chargement…</pre>
+      </div>
+    </section>
+
+    <section id="monitor" class="panel">
+      <div class="card">
+        <h2>Moniteur univers DMX</h2>
+        <div class="row">
+          <select id="universe-select"></select>
+          <button id="btn-refresh-monitor">Rafraîchir</button>
+        </div>
+        <div id="dmx-grid" class="dmx-grid"></div>
+      </div>
+    </section>
+
+    <section id="config" class="panel">
+      <div class="card">
+        <h2>Configuration P1</h2>
+        <div class="row">
+          <button id="btn-reload-config">Recharger</button>
+          <button id="btn-save-config">Enregistrer</button>
+        </div>
+        <p id="config-errors" class="errors"></p>
+        <textarea id="config-editor" spellcheck="false"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

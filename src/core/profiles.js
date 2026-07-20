@@ -248,6 +248,23 @@ function touchProfile(profileId) {
   });
 }
 
+/** Renomme le label d’un profil (l’id disque reste inchangé). */
+function renameProfile(profileId, label) {
+  ensureMigrated();
+  const id = sanitizeProfileId(profileId);
+  if (!fs.existsSync(getConfigPath(id))) {
+    throw new Error(`Profil introuvable : ${id}`);
+  }
+  const trimmed = String(label || "").trim();
+  if (!trimmed) throw new Error("Label requis");
+  writeMeta(id, {
+    ...readMeta(id),
+    label: trimmed,
+    updatedAt: new Date().toISOString(),
+  });
+  return listProfiles().find((p) => p.id === id);
+}
+
 module.exports = {
   DEFAULT_PROFILE_ID,
   MAPPING_PATH,
@@ -258,6 +275,8 @@ module.exports = {
   setActiveProfile,
   createProfile,
   deleteProfile,
+  renameProfile,
+  profileDir,
   getConfigPath,
   getWallBandsPath,
   getMetaPath,

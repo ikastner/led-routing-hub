@@ -174,3 +174,44 @@ pre {
   border-radius: 4px;
   min-width: 8rem;
 }
+
+.ok {
+  color: #8dcc9a;
+  min-height: 1.2rem;
+  white-space: pre-wrap;
+}
+
+.install-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 960px) {
+  .install-grid {
+    grid-template-columns: 1.2fr 1fr;
+  }
+  .install-summary-card {
+    grid-column: 1 / -1;
+  }
+}
+
+.summary-dl {
+  display: grid;
+  grid-template-columns: 10rem 1fr;
+  gap: 0.4rem 1rem;
+  margin: 0;
+}
+
+.summary-dl dt {
+  color: var(--muted);
+  margin: 0;
+}
+
+.summary-dl dd {
+  margin: 0;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 0.85em;
+}

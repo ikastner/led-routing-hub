@@ -1,4 +1,13 @@
-const { loadConfig, saveConfig, validateConfig, printInstallInfo } = require("../core/config");
+const fs = require("fs");
+const path = require("path");
+const {
+  loadConfig,
+  saveConfig,
+  validateConfig,
+  printInstallInfo,
+  getProjector,
+  getLyres,
+} = require("../core/config");
 const { createBufferManager } = require("../core/dmxBuffers");
 const { startStateReceiver } = require("../core/stateReceiver");
 const { startSenderLoop } = require("../core/senderLoop");
@@ -7,6 +16,7 @@ const { blackoutAll } = require("../core/blackout");
 const { STATE_PORT } = require("../core/protocol");
 const { createConfigServer, CONFIG_API_PORT } = require("../core/configServer");
 const { murLedToWallBands, deriveAndWriteWallBands } = require("../core/wallBands");
+const { parseEcran, MAPPING_PATH } = require("../core/parseEcran");
 const {
   ensureMigrated,
   listProfiles,
@@ -14,6 +24,8 @@ const {
   setActiveProfile,
   createProfile,
   deleteProfile,
+  renameProfile,
+  profileDir,
 } = require("../core/profiles");
 
 class RoutingEngine {
@@ -166,6 +178,74 @@ class RoutingEngine {
 
   deleteProfile(profileId) {
     return deleteProfile(profileId);
+  }
+
+  renameProfile(profileId, label) {
+    return renameProfile(profileId, label);
+  }
+
+  getInstallSummary() {
+    const config = this.getConfig();
+    const active = getActiveProfile();
+    const errors = validateConfig(config);
+    const led = (config.segments ?? []).filter((s) => s.type === "rgb");
+    const projector = getProjector(config);
+    const lyres = getLyres(config);
+    return {
+      profile: { id: active.id, label: active.label },
+      controllers: config.controllers?.length ?? 0,
+      ledBands: led.length,
+      ledEntities: led.reduce((sum, s) => sum + (s.entityCount ?? 0), 0),
+      lyres: lyres.length,
+      projector: projector
+        ? {
+            name: projector.name,
+            controllerIp: projector.controllerIp,
+            universe: projector.universe,
+          }
+        : null,
+      errors,
+      generatedFrom: config.generatedFrom ?? null,
+    };
+  }
+
+  /**
+   * Importe un Excel dans le profil actif : parse → validate → save (+ archive Ecran.xlsx).
+   */
+  importExcel(xlsxPath) {
+    const config = parseEcran(xlsxPath);
+    const errors = validateConfig(config);
+    if (errors.length) {
+      return { ok: false, errors, config: null };
+    }
+
+    const active = getActiveProfile();
+    saveConfig(config);
+    this.config = config;
+
+    const archivePath = path.join(profileDir(active.id), "Ecran.xlsx");
+    try {
+      fs.copyFileSync(xlsxPath, archivePath);
+    } catch (_) {
+      /* archive optionnelle */
+    }
+
+    if (this.running) {
+      this.bufferManager = createBufferManager(this.config);
+    }
+
+    return {
+      ok: true,
+      errors: [],
+      profile: getActiveProfile(),
+      summary: this.getInstallSummary(),
+      wallBandsPath: active.wallBandsPath,
+      archivedExcel: fs.existsSync(archivePath) ? archivePath : null,
+    };
+  }
+
+  getTemplatePath() {
+    return MAPPING_PATH;
   }
 
   /**

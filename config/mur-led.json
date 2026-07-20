@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedFrom": "mapping/Ecran.xlsx",
+  "generatedFrom": "Ecran.xlsx",
   "description": "Mapping mur LED 128×128 + projecteur RGBW + 4 lyres (BC216)",
   "controllers": [
     {

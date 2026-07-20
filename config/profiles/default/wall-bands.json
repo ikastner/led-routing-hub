@@ -642,5 +642,6 @@
       "entityCount": 89
     }
   ],
-  "generatedFrom": "mapping/Ecran.xlsx"
+  "generatedFrom": "Ecran.xlsx",
+  "profile": "default"
 }

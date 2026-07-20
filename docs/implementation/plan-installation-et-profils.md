@@ -153,10 +153,10 @@ Règles :
 
 #### Critères d’acceptation
 
-- [ ] Import Excel depuis l’UI régénère `mur-led` + `wall-bands` du profil
-- [ ] Erreurs de validation affichées clairement (chevauchement DMX, etc.)
-- [ ] Export `wall-bands.json` utilisable tel quel par le studio
-- [ ] Un technicien fait le flux sans ouvrir un terminal
+- [x] Import Excel depuis l’UI régénère `mur-led` + `wall-bands` du profil
+- [x] Erreurs de validation affichées clairement (chevauchement DMX, etc.)
+- [x] Export `wall-bands.json` utilisable tel quel par le studio
+- [x] Un technicien fait le flux sans ouvrir un terminal
 
 #### Fichiers touchés
 

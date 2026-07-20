@@ -8,6 +8,10 @@ const configErrors = document.getElementById("config-errors");
 const profilesList = document.getElementById("profiles-list");
 const profilesMsg = document.getElementById("profiles-msg");
 const configProfileLabel = document.getElementById("config-profile-label");
+const excelMsg = document.getElementById("excel-msg");
+const excelOk = document.getElementById("excel-ok");
+const installSummary = document.getElementById("install-summary");
+const summaryErrors = document.getElementById("summary-errors");
 
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -15,7 +19,10 @@ tabs.forEach((tab) => {
     panels.forEach((p) => p.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById(tab.dataset.tab).classList.add("active");
-    if (tab.dataset.tab === "profiles") refreshProfiles();
+    if (tab.dataset.tab === "installation") {
+      refreshProfiles();
+      refreshInstallSummary();
+    }
   });
 });
 
@@ -70,6 +77,24 @@ async function loadConfigEditor() {
   configErrors.textContent = errors.length ? errors.join("\n") : "";
 }
 
+async function refreshInstallSummary() {
+  const s = await window.routing.getInstallSummary();
+  installSummary.innerHTML = `
+    <dt>Profil</dt><dd>${s.profile.label} <span class="muted">(${s.profile.id})</span></dd>
+    <dt>Contrôleurs</dt><dd>${s.controllers}</dd>
+    <dt>Bandes LED</dt><dd>${s.ledBands}</dd>
+    <dt>Entités LED</dt><dd>${s.ledEntities}</dd>
+    <dt>Lyres</dt><dd>${s.lyres}</dd>
+    <dt>Projecteur</dt><dd>${
+      s.projector
+        ? `${s.projector.name} → ${s.projector.controllerIp} u${s.projector.universe}`
+        : "—"
+    }</dd>
+    <dt>Source</dt><dd>${s.generatedFrom ?? "—"}</dd>
+  `;
+  summaryErrors.textContent = s.errors?.length ? s.errors.join("\n") : "";
+}
+
 async function refreshProfiles() {
   profilesMsg.textContent = "";
   const profiles = await window.routing.listProfiles();
@@ -94,35 +119,55 @@ async function refreshProfiles() {
       btnActivate.addEventListener("click", async () => {
         try {
           await window.routing.activateProfile(p.id);
-          await refreshProfiles();
-          await loadConfigEditor();
-          await loadUniverses();
-          await refreshStatus();
+          await afterProfileChange();
         } catch (err) {
           profilesMsg.textContent = err.message;
         }
       });
       li.appendChild(btnActivate);
+    }
 
-      if (p.id !== "default") {
-        const btnDelete = document.createElement("button");
-        btnDelete.className = "danger";
-        btnDelete.textContent = "Supprimer";
-        btnDelete.addEventListener("click", async () => {
-          if (!confirm(`Supprimer le profil « ${p.id} » ?`)) return;
-          try {
-            await window.routing.deleteProfile(p.id);
-            await refreshProfiles();
-          } catch (err) {
-            profilesMsg.textContent = err.message;
-          }
-        });
-        li.appendChild(btnDelete);
+    const btnRename = document.createElement("button");
+    btnRename.textContent = "Renommer";
+    btnRename.addEventListener("click", async () => {
+      const label = prompt("Nouveau label", p.label);
+      if (!label) return;
+      try {
+        await window.routing.renameProfile(p.id, label);
+        await refreshProfiles();
+        await refreshInstallSummary();
+      } catch (err) {
+        profilesMsg.textContent = err.message;
       }
+    });
+    li.appendChild(btnRename);
+
+    if (!p.active && p.id !== "default") {
+      const btnDelete = document.createElement("button");
+      btnDelete.className = "danger";
+      btnDelete.textContent = "Supprimer";
+      btnDelete.addEventListener("click", async () => {
+        if (!confirm(`Supprimer le profil « ${p.id} » ?`)) return;
+        try {
+          await window.routing.deleteProfile(p.id);
+          await refreshProfiles();
+        } catch (err) {
+          profilesMsg.textContent = err.message;
+        }
+      });
+      li.appendChild(btnDelete);
     }
 
     profilesList.appendChild(li);
   }
+}
+
+async function afterProfileChange() {
+  await refreshProfiles();
+  await refreshInstallSummary();
+  await loadConfigEditor();
+  await loadUniverses();
+  await refreshStatus();
 }
 
 document.getElementById("btn-start").addEventListener("click", async () => {
@@ -161,6 +206,43 @@ document.getElementById("btn-create-profile").addEventListener("click", async ()
   }
 });
 
+document.getElementById("btn-download-template").addEventListener("click", async () => {
+  excelMsg.textContent = "";
+  excelOk.textContent = "";
+  const result = await window.routing.downloadTemplate();
+  if (result.canceled) return;
+  if (!result.ok) {
+    excelMsg.textContent = result.error ?? "Échec";
+    return;
+  }
+  excelOk.textContent = `Template enregistré : ${result.path}`;
+});
+
+document.getElementById("btn-import-excel").addEventListener("click", async () => {
+  excelMsg.textContent = "";
+  excelOk.textContent = "";
+  const result = await window.routing.importExcel();
+  if (result.canceled) return;
+  if (!result.ok) {
+    excelMsg.textContent = (result.errors ?? ["Import échoué"]).join("\n");
+    return;
+  }
+  excelOk.textContent = `Import OK — ${result.summary.ledBands} bandes, ${result.summary.ledEntities} entités`;
+  await afterProfileChange();
+});
+
+document.getElementById("btn-export-wall-bands").addEventListener("click", async () => {
+  excelMsg.textContent = "";
+  excelOk.textContent = "";
+  const result = await window.routing.exportWallBands();
+  if (result.canceled) return;
+  if (!result.ok) {
+    excelMsg.textContent = "Export échoué";
+    return;
+  }
+  excelOk.textContent = `Exporté ${result.bands} bandes → ${result.path}`;
+});
+
 document.getElementById("btn-save-config").addEventListener("click", async () => {
   try {
     const config = JSON.parse(configEditor.value);
@@ -171,6 +253,7 @@ document.getElementById("btn-save-config").addEventListener("click", async () =>
     }
     await window.routing.saveConfig(config);
     configErrors.textContent = "Config enregistrée.";
+    await refreshInstallSummary();
   } catch (err) {
     configErrors.textContent = err.message;
   }
@@ -179,6 +262,7 @@ document.getElementById("btn-save-config").addEventListener("click", async () =>
 loadUniverses();
 loadConfigEditor();
 refreshProfiles();
+refreshInstallSummary();
 refreshStatus();
 setInterval(refreshStatus, 1000);
 setInterval(() => {

@@ -19,4 +19,8 @@ contextBridge.exposeInMainWorld("routing", {
   activateProfile: (id) => ipcRenderer.invoke("engine:profiles:activate", id),
   createProfile: (input) => ipcRenderer.invoke("engine:profiles:create", input),
   deleteProfile: (id) => ipcRenderer.invoke("engine:profiles:delete", id),
+  renameProfile: (id, label) => ipcRenderer.invoke("engine:profiles:rename", id, label),
+  getInstallSummary: () => ipcRenderer.invoke("engine:install-summary"),
+  importExcel: () => ipcRenderer.invoke("engine:import-excel"),
+  downloadTemplate: () => ipcRenderer.invoke("engine:download-template"),
 });

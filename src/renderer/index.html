@@ -15,8 +15,8 @@
   <nav class="tabs">
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="monitor">Moniteur DMX</button>
-    <button class="tab" data-tab="profiles">Profils</button>
-    <button class="tab" data-tab="config">Configuration</button>
+    <button class="tab" data-tab="installation">Installation</button>
+    <button class="tab" data-tab="config">Avancé</button>
   </nav>
 
   <main>
@@ -44,18 +44,40 @@
       </div>
     </section>
 
-    <section id="profiles" class="panel">
-      <div class="card">
-        <h2>Profils d’installation</h2>
-        <p class="hint">Un seul profil actif. Studio / Unity lisent son <code>wall-bands</code> via l’API :6456.</p>
-        <div class="row">
-          <input id="profile-id" placeholder="id (ex: salle-b)" />
-          <input id="profile-label" placeholder="Label (optionnel)" />
-          <button id="btn-create-profile">Créer</button>
-          <button id="btn-refresh-profiles">Rafraîchir</button>
+    <section id="installation" class="panel">
+      <div class="install-grid">
+        <div class="card">
+          <h2>Profils</h2>
+          <p class="hint">Un seul profil actif. Studio / Unity lisent son mapping via l’API :6456.</p>
+          <div class="row">
+            <input id="profile-id" placeholder="id (ex: salle-b)" />
+            <input id="profile-label" placeholder="Label (optionnel)" />
+            <button id="btn-create-profile">Nouveau</button>
+            <button id="btn-refresh-profiles">Rafraîchir</button>
+          </div>
+          <p id="profiles-msg" class="errors"></p>
+          <ul id="profiles-list" class="profiles-list"></ul>
         </div>
-        <p id="profiles-msg" class="errors"></p>
-        <ul id="profiles-list" class="profiles-list"></ul>
+
+        <div class="card">
+          <h2>Excel → mapping</h2>
+          <p class="hint">Importer un <code>Ecran.xlsx</code> régénère <code>mur-led</code> + <code>wall-bands</code> du profil actif.</p>
+          <div class="row">
+            <button id="btn-download-template">Télécharger le template</button>
+            <button id="btn-import-excel">Importer un Excel…</button>
+            <button id="btn-export-wall-bands">Exporter wall-bands…</button>
+          </div>
+          <p id="excel-msg" class="errors"></p>
+          <p id="excel-ok" class="ok"></p>
+        </div>
+
+        <div class="card install-summary-card">
+          <h2>Résumé installation</h2>
+          <dl id="install-summary" class="summary-dl">
+            <dt>Profil</dt><dd>—</dd>
+          </dl>
+          <p id="summary-errors" class="errors"></p>
+        </div>
       </div>
     </section>
 

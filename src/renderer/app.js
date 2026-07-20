@@ -17,6 +17,9 @@ tabs.forEach((tab) => {
 
 async function refreshStatus() {
   const status = await window.routing.status();
+  if (status?.configApi?.listening) {
+    status.configApi.wallBandsUrl = `${status.configApi.url}/api/wall-bands`;
+  }
   statusBox.textContent = JSON.stringify(status, null, 2);
 }
 

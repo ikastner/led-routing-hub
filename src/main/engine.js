@@ -5,6 +5,9 @@ const { startSenderLoop } = require("../core/senderLoop");
 const { startWatchdog } = require("../core/watchdog");
 const { blackoutAll } = require("../core/blackout");
 const { STATE_PORT } = require("../core/protocol");
+const { createConfigServer, CONFIG_API_PORT } = require("../core/configServer");
+const { murLedToWallBands, deriveAndWriteWallBands } = require("../core/wallBands");
+const { WALL_BANDS_PATH } = require("../core/paths");
 
 class RoutingEngine {
   constructor() {
@@ -14,12 +17,38 @@ class RoutingEngine {
     this.sender = null;
     this.watchdog = null;
     this.running = false;
-    this.options = { port: STATE_PORT, hz: 40, dryRun: false, watchdogMs: 2000 };
+    this.options = {
+      port: STATE_PORT,
+      hz: 40,
+      dryRun: false,
+      watchdogMs: 2000,
+      configApiPort: CONFIG_API_PORT,
+    };
     this.stats = {
       receiver: {},
       senderTicks: 0,
       watchdogBlackout: false,
     };
+    this.configServer = createConfigServer(() => ({
+      running: this.running,
+      statePort: this.options.port,
+      profileId: "default",
+      profileLabel: "default",
+      getConfig: () => this.getConfig(),
+    }));
+  }
+
+  async startConfigApi(options = {}) {
+    if (this.configServer.isListening()) {
+      return { port: this.configServer.getPort() };
+    }
+    return this.configServer.start({
+      port: options.configApiPort ?? this.options.configApiPort ?? CONFIG_API_PORT,
+    });
+  }
+
+  stopConfigApi() {
+    this.configServer.stop();
   }
 
   async start(options = {}) {
@@ -28,6 +57,8 @@ class RoutingEngine {
     this.options = { ...this.options, ...options };
     this.config = loadConfig();
     this.bufferManager = createBufferManager(this.config);
+
+    await this.startConfigApi({ configApiPort: this.options.configApiPort });
 
     this.receiver = startStateReceiver(this.bufferManager, {
       port: this.options.port,
@@ -84,6 +115,20 @@ class RoutingEngine {
     return this.config ?? loadConfig();
   }
 
+  getWallBands() {
+    return murLedToWallBands(this.getConfig(), {
+      profile: "default",
+      generatedFrom: this.getConfig().generatedFrom ?? "config/mur-led.json",
+    });
+  }
+
+  exportWallBands(outPath = WALL_BANDS_PATH) {
+    return deriveAndWriteWallBands(this.getConfig(), outPath, {
+      profile: "default",
+      generatedFrom: this.getConfig().generatedFrom ?? "config/mur-led.json",
+    });
+  }
+
   reloadConfig() {
     this.config = loadConfig();
     if (this.running) {
@@ -127,6 +172,11 @@ class RoutingEngine {
       running: this.running,
       buffers: this.bufferManager?.size ?? 0,
       options: this.options,
+      configApi: {
+        listening: this.configServer.isListening(),
+        port: this.configServer.getPort(),
+        url: `http://127.0.0.1:${this.configServer.getPort()}`,
+      },
       stats: {
         ...this.stats,
         watchdogBlackout: this.watchdog?.isBlackoutActive?.() ?? false,

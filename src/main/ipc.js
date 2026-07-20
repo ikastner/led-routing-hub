@@ -12,6 +12,9 @@ function setupIpc(engine) {
   ipcMain.handle("engine:validate-config", (_evt, config) => engine.validateConfigData(config));
   ipcMain.handle("engine:universes", () => engine.listUniverses());
   ipcMain.handle("engine:dmx-snapshot", (_evt, ip, universe) => engine.getDmxSnapshot(ip, universe));
+  ipcMain.handle("engine:wall-bands", () => engine.getWallBands());
+  ipcMain.handle("engine:export-wall-bands", (_evt, outPath) => engine.exportWallBands(outPath));
+  ipcMain.handle("engine:start-config-api", async (_evt, options) => engine.startConfigApi(options));
 }
 
 module.exports = { setupIpc };

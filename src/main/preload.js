@@ -11,4 +11,7 @@ contextBridge.exposeInMainWorld("routing", {
   validateConfig: (config) => ipcRenderer.invoke("engine:validate-config", config),
   listUniverses: () => ipcRenderer.invoke("engine:universes"),
   dmxSnapshot: (ip, universe) => ipcRenderer.invoke("engine:dmx-snapshot", ip, universe),
+  getWallBands: () => ipcRenderer.invoke("engine:wall-bands"),
+  exportWallBands: (outPath) => ipcRenderer.invoke("engine:export-wall-bands", outPath),
+  startConfigApi: (options) => ipcRenderer.invoke("engine:start-config-api", options),
 });

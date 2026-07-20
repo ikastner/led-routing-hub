@@ -20,8 +20,13 @@ function createWindow() {
   mainWindow.loadFile(path.join(__dirname, "../renderer/index.html"));
 }
 
-app.whenReady().then(() => {
+app.whenReady().then(async () => {
   setupIpc(engine);
+  try {
+    await engine.startConfigApi();
+  } catch (err) {
+    console.error(`[config-api] démarrage échoué : ${err.message}`);
+  }
   createWindow();
 
   app.on("activate", () => {
@@ -31,9 +36,11 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", async () => {
   await engine.stop();
+  engine.stopConfigApi();
   if (process.platform !== "darwin") app.quit();
 });
 
 app.on("before-quit", async () => {
   await engine.stop();
+  engine.stopConfigApi();
 });

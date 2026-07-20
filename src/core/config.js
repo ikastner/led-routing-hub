@@ -3,7 +3,8 @@
 **/
 
 const fs = require("fs");
-const { CONFIG_PATH } = require("./paths");
+const { CONFIG_PATH, WALL_BANDS_PATH } = require("./paths");
+const { deriveAndWriteWallBands } = require("./wallBands");
 
 function loadConfig(configPath = CONFIG_PATH) {
   if (!fs.existsSync(configPath)) {
@@ -20,6 +21,9 @@ function saveConfig(config, configPath = CONFIG_PATH) {
     throw new Error(`Config invalide :\n${errors.map((e) => `  - ${e}`).join("\n")}`);
   }
   fs.writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`, "utf-8");
+  deriveAndWriteWallBands(config, WALL_BANDS_PATH, {
+    generatedFrom: config.generatedFrom ?? configPath,
+  });
 }
 
 function validateConfig(config) {

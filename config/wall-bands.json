@@ -1,0 +1,646 @@
+{
+  "columns": 128,
+  "bands": [
+    {
+      "column": 0,
+      "entityStart": 100,
+      "entityCount": 170
+    },
+    {
+      "column": 1,
+      "entityStart": 270,
+      "entityCount": 89
+    },
+    {
+      "column": 2,
+      "entityStart": 400,
+      "entityCount": 170
+    },
+    {
+      "column": 3,
+      "entityStart": 570,
+      "entityCount": 89
+    },
+    {
+      "column": 4,
+      "entityStart": 700,
+      "entityCount": 170
+    },
+    {
+      "column": 5,
+      "entityStart": 870,
+      "entityCount": 89
+    },
+    {
+      "column": 6,
+      "entityStart": 1000,
+      "entityCount": 170
+    },
+    {
+      "column": 7,
+      "entityStart": 1170,
+      "entityCount": 89
+    },
+    {
+      "column": 8,
+      "entityStart": 1300,
+      "entityCount": 170
+    },
+    {
+      "column": 9,
+      "entityStart": 1470,
+      "entityCount": 89
+    },
+    {
+      "column": 10,
+      "entityStart": 1600,
+      "entityCount": 170
+    },
+    {
+      "column": 11,
+      "entityStart": 1770,
+      "entityCount": 89
+    },
+    {
+      "column": 12,
+      "entityStart": 1900,
+      "entityCount": 170
+    },
+    {
+      "column": 13,
+      "entityStart": 2070,
+      "entityCount": 89
+    },
+    {
+      "column": 14,
+      "entityStart": 2200,
+      "entityCount": 170
+    },
+    {
+      "column": 15,
+      "entityStart": 2370,
+      "entityCount": 89
+    },
+    {
+      "column": 16,
+      "entityStart": 2500,
+      "entityCount": 170
+    },
+    {
+      "column": 17,
+      "entityStart": 2670,
+      "entityCount": 89
+    },
+    {
+      "column": 18,
+      "entityStart": 2800,
+      "entityCount": 170
+    },
+    {
+      "column": 19,
+      "entityStart": 2970,
+      "entityCount": 89
+    },
+    {
+      "column": 20,
+      "entityStart": 3100,
+      "entityCount": 170
+    },
+    {
+      "column": 21,
+      "entityStart": 3270,
+      "entityCount": 89
+    },
+    {
+      "column": 22,
+      "entityStart": 3400,
+      "entityCount": 170
+    },
+    {
+      "column": 23,
+      "entityStart": 3570,
+      "entityCount": 89
+    },
+    {
+      "column": 24,
+      "entityStart": 3700,
+      "entityCount": 170
+    },
+    {
+      "column": 25,
+      "entityStart": 3870,
+      "entityCount": 89
+    },
+    {
+      "column": 26,
+      "entityStart": 4000,
+      "entityCount": 170
+    },
+    {
+      "column": 27,
+      "entityStart": 4170,
+      "entityCount": 89
+    },
+    {
+      "column": 28,
+      "entityStart": 4300,
+      "entityCount": 170
+    },
+    {
+      "column": 29,
+      "entityStart": 4470,
+      "entityCount": 89
+    },
+    {
+      "column": 30,
+      "entityStart": 4600,
+      "entityCount": 170
+    },
+    {
+      "column": 31,
+      "entityStart": 4770,
+      "entityCount": 89
+    },
+    {
+      "column": 32,
+      "entityStart": 5100,
+      "entityCount": 170
+    },
+    {
+      "column": 33,
+      "entityStart": 5270,
+      "entityCount": 89
+    },
+    {
+      "column": 34,
+      "entityStart": 5400,
+      "entityCount": 170
+    },
+    {
+      "column": 35,
+      "entityStart": 5570,
+      "entityCount": 89
+    },
+    {
+      "column": 36,
+      "entityStart": 5700,
+      "entityCount": 170
+    },
+    {
+      "column": 37,
+      "entityStart": 5870,
+      "entityCount": 89
+    },
+    {
+      "column": 38,
+      "entityStart": 6000,
+      "entityCount": 170
+    },
+    {
+      "column": 39,
+      "entityStart": 6170,
+      "entityCount": 89
+    },
+    {
+      "column": 40,
+      "entityStart": 6300,
+      "entityCount": 170
+    },
+    {
+      "column": 41,
+      "entityStart": 6470,
+      "entityCount": 89
+    },
+    {
+      "column": 42,
+      "entityStart": 6600,
+      "entityCount": 170
+    },
+    {
+      "column": 43,
+      "entityStart": 6770,
+      "entityCount": 89
+    },
+    {
+      "column": 44,
+      "entityStart": 6900,
+      "entityCount": 170
+    },
+    {
+      "column": 45,
+      "entityStart": 7070,
+      "entityCount": 89
+    },
+    {
+      "column": 46,
+      "entityStart": 7200,
+      "entityCount": 170
+    },
+    {
+      "column": 47,
+      "entityStart": 7370,
+      "entityCount": 89
+    },
+    {
+      "column": 48,
+      "entityStart": 7500,
+      "entityCount": 170
+    },
+    {
+      "column": 49,
+      "entityStart": 7670,
+      "entityCount": 89
+    },
+    {
+      "column": 50,
+      "entityStart": 7800,
+      "entityCount": 170
+    },
+    {
+      "column": 51,
+      "entityStart": 7970,
+      "entityCount": 89
+    },
+    {
+      "column": 52,
+      "entityStart": 8100,
+      "entityCount": 170
+    },
+    {
+      "column": 53,
+      "entityStart": 8270,
+      "entityCount": 89
+    },
+    {
+      "column": 54,
+      "entityStart": 8400,
+      "entityCount": 170
+    },
+    {
+      "column": 55,
+      "entityStart": 8570,
+      "entityCount": 89
+    },
+    {
+      "column": 56,
+      "entityStart": 8700,
+      "entityCount": 170
+    },
+    {
+      "column": 57,
+      "entityStart": 8870,
+      "entityCount": 89
+    },
+    {
+      "column": 58,
+      "entityStart": 9000,
+      "entityCount": 170
+    },
+    {
+      "column": 59,
+      "entityStart": 9170,
+      "entityCount": 89
+    },
+    {
+      "column": 60,
+      "entityStart": 9300,
+      "entityCount": 170
+    },
+    {
+      "column": 61,
+      "entityStart": 9470,
+      "entityCount": 89
+    },
+    {
+      "column": 62,
+      "entityStart": 9600,
+      "entityCount": 170
+    },
+    {
+      "column": 63,
+      "entityStart": 9770,
+      "entityCount": 89
+    },
+    {
+      "column": 64,
+      "entityStart": 10100,
+      "entityCount": 170
+    },
+    {
+      "column": 65,
+      "entityStart": 10270,
+      "entityCount": 89
+    },
+    {
+      "column": 66,
+      "entityStart": 10400,
+      "entityCount": 170
+    },
+    {
+      "column": 67,
+      "entityStart": 10570,
+      "entityCount": 89
+    },
+    {
+      "column": 68,
+      "entityStart": 10700,
+      "entityCount": 170
+    },
+    {
+      "column": 69,
+      "entityStart": 10870,
+      "entityCount": 89
+    },
+    {
+      "column": 70,
+      "entityStart": 11000,
+      "entityCount": 170
+    },
+    {
+      "column": 71,
+      "entityStart": 11170,
+      "entityCount": 89
+    },
+    {
+      "column": 72,
+      "entityStart": 11300,
+      "entityCount": 170
+    },
+    {
+      "column": 73,
+      "entityStart": 11470,
+      "entityCount": 89
+    },
+    {
+      "column": 74,
+      "entityStart": 11600,
+      "entityCount": 170
+    },
+    {
+      "column": 75,
+      "entityStart": 11770,
+      "entityCount": 89
+    },
+    {
+      "column": 76,
+      "entityStart": 11900,
+      "entityCount": 170
+    },
+    {
+      "column": 77,
+      "entityStart": 12070,
+      "entityCount": 89
+    },
+    {
+      "column": 78,
+      "entityStart": 12200,
+      "entityCount": 170
+    },
+    {
+      "column": 79,
+      "entityStart": 12370,
+      "entityCount": 89
+    },
+    {
+      "column": 80,
+      "entityStart": 12500,
+      "entityCount": 170
+    },
+    {
+      "column": 81,
+      "entityStart": 12670,
+      "entityCount": 89
+    },
+    {
+      "column": 82,
+      "entityStart": 12800,
+      "entityCount": 170
+    },
+    {
+      "column": 83,
+      "entityStart": 12970,
+      "entityCount": 89
+    },
+    {
+      "column": 84,
+      "entityStart": 13100,
+      "entityCount": 170
+    },
+    {
+      "column": 85,
+      "entityStart": 13270,
+      "entityCount": 89
+    },
+    {
+      "column": 86,
+      "entityStart": 13400,
+      "entityCount": 170
+    },
+    {
+      "column": 87,
+      "entityStart": 13570,
+      "entityCount": 89
+    },
+    {
+      "column": 88,
+      "entityStart": 13700,
+      "entityCount": 170
+    },
+    {
+      "column": 89,
+      "entityStart": 13870,
+      "entityCount": 89
+    },
+    {
+      "column": 90,
+      "entityStart": 14000,
+      "entityCount": 170
+    },
+    {
+      "column": 91,
+      "entityStart": 14170,
+      "entityCount": 89
+    },
+    {
+      "column": 92,
+      "entityStart": 14300,
+      "entityCount": 170
+    },
+    {
+      "column": 93,
+      "entityStart": 14470,
+      "entityCount": 89
+    },
+    {
+      "column": 94,
+      "entityStart": 14600,
+      "entityCount": 170
+    },
+    {
+      "column": 95,
+      "entityStart": 14770,
+      "entityCount": 89
+    },
+    {
+      "column": 96,
+      "entityStart": 15100,
+      "entityCount": 170
+    },
+    {
+      "column": 97,
+      "entityStart": 15270,
+      "entityCount": 89
+    },
+    {
+      "column": 98,
+      "entityStart": 15400,
+      "entityCount": 170
+    },
+    {
+      "column": 99,
+      "entityStart": 15570,
+      "entityCount": 89
+    },
+    {
+      "column": 100,
+      "entityStart": 15700,
+      "entityCount": 170
+    },
+    {
+      "column": 101,
+      "entityStart": 15870,
+      "entityCount": 89
+    },
+    {
+      "column": 102,
+      "entityStart": 16000,
+      "entityCount": 170
+    },
+    {
+      "column": 103,
+      "entityStart": 16170,
+      "entityCount": 89
+    },
+    {
+      "column": 104,
+      "entityStart": 16300,
+      "entityCount": 170
+    },
+    {
+      "column": 105,
+      "entityStart": 16470,
+      "entityCount": 89
+    },
+    {
+      "column": 106,
+      "entityStart": 16600,
+      "entityCount": 170
+    },
+    {
+      "column": 107,
+      "entityStart": 16770,
+      "entityCount": 89
+    },
+    {
+      "column": 108,
+      "entityStart": 16900,
+      "entityCount": 170
+    },
+    {
+      "column": 109,
+      "entityStart": 17070,
+      "entityCount": 89
+    },
+    {
+      "column": 110,
+      "entityStart": 17200,
+      "entityCount": 170
+    },
+    {
+      "column": 111,
+      "entityStart": 17370,
+      "entityCount": 89
+    },
+    {
+      "column": 112,
+      "entityStart": 17500,
+      "entityCount": 170
+    },
+    {
+      "column": 113,
+      "entityStart": 17670,
+      "entityCount": 89
+    },
+    {
+      "column": 114,
+      "entityStart": 17800,
+      "entityCount": 170
+    },
+    {
+      "column": 115,
+      "entityStart": 17970,
+      "entityCount": 89
+    },
+    {
+      "column": 116,
+      "entityStart": 18100,
+      "entityCount": 170
+    },
+    {
+      "column": 117,
+      "entityStart": 18270,
+      "entityCount": 89
+    },
+    {
+      "column": 118,
+      "entityStart": 18400,
+      "entityCount": 170
+    },
+    {
+      "column": 119,
+      "entityStart": 18570,
+      "entityCount": 89
+    },
+    {
+      "column": 120,
+      "entityStart": 18700,
+      "entityCount": 170
+    },
+    {
+      "column": 121,
+      "entityStart": 18870,
+      "entityCount": 89
+    },
+    {
+      "column": 122,
+      "entityStart": 19000,
+      "entityCount": 170
+    },
+    {
+      "column": 123,
+      "entityStart": 19170,
+      "entityCount": 89
+    },
+    {
+      "column": 124,
+      "entityStart": 19300,
+      "entityCount": 170
+    },
+    {
+      "column": 125,
+      "entityStart": 19470,
+      "entityCount": 89
+    },
+    {
+      "column": 126,
+      "entityStart": 19600,
+      "entityCount": 170
+    },
+    {
+      "column": 127,
+      "entityStart": 19770,
+      "entityCount": 89
+    }
+  ],
+  "generatedFrom": "mapping/Ecran.xlsx"
+}

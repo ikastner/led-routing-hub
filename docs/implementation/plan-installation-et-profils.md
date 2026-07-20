@@ -109,10 +109,10 @@ Règles :
 
 #### Critères d’acceptation
 
-- [ ] Deux profils coexistent sur disque
-- [ ] Activer un profil change le mapping runtime (vérifiable via moniteur DMX + faker)
-- [ ] `active.json` persiste le choix au redémarrage
-- [ ] Migration auto depuis l’ancien `config/mur-led.json`
+- [x] Deux profils coexistent sur disque
+- [x] Activer un profil change le mapping runtime (vérifiable via moniteur DMX + faker)
+- [x] `active.json` persiste le choix au redémarrage
+- [x] Migration auto depuis l’ancien `config/mur-led.json`
 
 #### Fichiers touchés
 

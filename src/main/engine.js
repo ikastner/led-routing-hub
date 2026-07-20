@@ -7,7 +7,14 @@ const { blackoutAll } = require("../core/blackout");
 const { STATE_PORT } = require("../core/protocol");
 const { createConfigServer, CONFIG_API_PORT } = require("../core/configServer");
 const { murLedToWallBands, deriveAndWriteWallBands } = require("../core/wallBands");
-const { WALL_BANDS_PATH } = require("../core/paths");
+const {
+  ensureMigrated,
+  listProfiles,
+  getActiveProfile,
+  setActiveProfile,
+  createProfile,
+  deleteProfile,
+} = require("../core/profiles");
 
 class RoutingEngine {
   constructor() {
@@ -29,13 +36,19 @@ class RoutingEngine {
       senderTicks: 0,
       watchdogBlackout: false,
     };
-    this.configServer = createConfigServer(() => ({
-      running: this.running,
-      statePort: this.options.port,
-      profileId: "default",
-      profileLabel: "default",
-      getConfig: () => this.getConfig(),
-    }));
+
+    ensureMigrated();
+
+    this.configServer = createConfigServer(() => {
+      const active = getActiveProfile();
+      return {
+        running: this.running,
+        statePort: this.options.port,
+        profileId: active.id,
+        profileLabel: active.label,
+        getConfig: () => this.getConfig(),
+      };
+    });
   }
 
   async startConfigApi(options = {}) {
@@ -55,6 +68,10 @@ class RoutingEngine {
     if (this.running) return this.getStatus();
 
     this.options = { ...this.options, ...options };
+    if (options.profile) {
+      setActiveProfile(options.profile);
+    }
+
     this.config = loadConfig();
     this.bufferManager = createBufferManager(this.config);
 
@@ -116,17 +133,65 @@ class RoutingEngine {
   }
 
   getWallBands() {
+    const active = getActiveProfile();
     return murLedToWallBands(this.getConfig(), {
-      profile: "default",
-      generatedFrom: this.getConfig().generatedFrom ?? "config/mur-led.json",
+      profile: active.id,
+      generatedFrom: this.getConfig().generatedFrom ?? active.configPath,
     });
   }
 
-  exportWallBands(outPath = WALL_BANDS_PATH) {
-    return deriveAndWriteWallBands(this.getConfig(), outPath, {
-      profile: "default",
-      generatedFrom: this.getConfig().generatedFrom ?? "config/mur-led.json",
-    });
+  exportWallBands(outPath) {
+    const active = getActiveProfile();
+    return deriveAndWriteWallBands(
+      this.getConfig(),
+      outPath ?? active.wallBandsPath,
+      {
+        profile: active.id,
+        generatedFrom: this.getConfig().generatedFrom ?? active.configPath,
+      },
+    );
+  }
+
+  listProfiles() {
+    return listProfiles();
+  }
+
+  getActiveProfile() {
+    return getActiveProfile();
+  }
+
+  createProfile(input) {
+    return createProfile(input);
+  }
+
+  deleteProfile(profileId) {
+    return deleteProfile(profileId);
+  }
+
+  /**
+   * Active un profil. Si le moteur tourne : stop (blackout) + restart avec la nouvelle config.
+   */
+  async activateProfile(profileId) {
+    const wasRunning = this.running;
+    const savedOptions = { ...this.options };
+
+    if (wasRunning) {
+      await this.stop();
+    }
+
+    const active = setActiveProfile(profileId);
+    this.config = loadConfig();
+
+    if (wasRunning) {
+      await this.start(savedOptions);
+    }
+
+    return {
+      ok: true,
+      profile: active,
+      running: this.running,
+      errors: validateConfig(this.config),
+    };
   }
 
   reloadConfig() {
@@ -168,10 +233,16 @@ class RoutingEngine {
   }
 
   getStatus() {
+    const active = getActiveProfile();
     return {
       running: this.running,
       buffers: this.bufferManager?.size ?? 0,
       options: this.options,
+      profile: {
+        id: active.id,
+        label: active.label,
+        configPath: active.configPath,
+      },
       configApi: {
         listening: this.configServer.isListening(),
         port: this.configServer.getPort(),

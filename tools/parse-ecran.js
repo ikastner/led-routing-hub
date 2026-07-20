@@ -150,19 +150,25 @@ function parseEcran(xlsxPath = MAPPING_PATH) {
 }
 
 function main() {
-  const { WALL_BANDS_PATH } = require("../src/core/paths");
-  const { deriveAndWriteWallBands } = require("../src/core/wallBands");
+  const { saveConfig } = require("../src/core/config");
+  const { ensureMigrated, getActiveProfile } = require("../src/core/profiles");
 
-  const out = process.argv[2] ?? CONFIG_PATH;
+  ensureMigrated();
+  const active = getActiveProfile();
+  const out = process.argv[2] ?? active.configPath;
   console.log(`Parse ${MAPPING_PATH}…`);
   const config = parseEcran();
-  fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, `${JSON.stringify(config, null, 2)}\n`);
-  const wallBands = deriveAndWriteWallBands(config, WALL_BANDS_PATH, {
-    generatedFrom: "mapping/Ecran.xlsx",
-  });
-  console.log(`Écrit ${out}`);
-  console.log(`Écrit ${WALL_BANDS_PATH} (${wallBands.columns} colonnes)`);
+  config.generatedFrom = "mapping/Ecran.xlsx";
+
+  if (out === active.configPath) {
+    saveConfig(config);
+    console.log(`Écrit profil actif « ${active.id} » → ${active.configPath}`);
+    console.log(`Écrit ${active.wallBandsPath}`);
+  } else {
+    fs.mkdirSync(path.dirname(out), { recursive: true });
+    fs.writeFileSync(out, `${JSON.stringify(config, null, 2)}\n`);
+    console.log(`Écrit ${out}`);
+  }
   console.log(`  ${config.stats.ledBandCount} bandes, ${config.stats.ledEntityCount} entités LED`);
 }
 

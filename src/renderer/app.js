@@ -5,6 +5,9 @@ const universeSelect = document.getElementById("universe-select");
 const dmxGrid = document.getElementById("dmx-grid");
 const configEditor = document.getElementById("config-editor");
 const configErrors = document.getElementById("config-errors");
+const profilesList = document.getElementById("profiles-list");
+const profilesMsg = document.getElementById("profiles-msg");
+const configProfileLabel = document.getElementById("config-profile-label");
 
 tabs.forEach((tab) => {
   tab.addEventListener("click", () => {
@@ -12,6 +15,7 @@ tabs.forEach((tab) => {
     panels.forEach((p) => p.classList.remove("active"));
     tab.classList.add("active");
     document.getElementById(tab.dataset.tab).classList.add("active");
+    if (tab.dataset.tab === "profiles") refreshProfiles();
   });
 });
 
@@ -56,10 +60,69 @@ async function refreshMonitor() {
 }
 
 async function loadConfigEditor() {
+  const active = await window.routing.getActiveProfile();
+  if (configProfileLabel) {
+    configProfileLabel.textContent = `Profil : ${active.id} (${active.label})`;
+  }
   const config = await window.routing.getConfig();
   configEditor.value = JSON.stringify(config, null, 2);
   const errors = await window.routing.validateConfig(config);
   configErrors.textContent = errors.length ? errors.join("\n") : "";
+}
+
+async function refreshProfiles() {
+  profilesMsg.textContent = "";
+  const profiles = await window.routing.listProfiles();
+  profilesList.innerHTML = "";
+  for (const p of profiles) {
+    const li = document.createElement("li");
+    if (p.active) li.classList.add("active");
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.innerHTML = `<strong>${p.label}</strong><span>${p.id}${p.updatedAt ? ` · ${p.updatedAt}` : ""}</span>`;
+    li.appendChild(meta);
+
+    if (p.active) {
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = "actif";
+      li.appendChild(badge);
+    } else {
+      const btnActivate = document.createElement("button");
+      btnActivate.textContent = "Activer";
+      btnActivate.addEventListener("click", async () => {
+        try {
+          await window.routing.activateProfile(p.id);
+          await refreshProfiles();
+          await loadConfigEditor();
+          await loadUniverses();
+          await refreshStatus();
+        } catch (err) {
+          profilesMsg.textContent = err.message;
+        }
+      });
+      li.appendChild(btnActivate);
+
+      if (p.id !== "default") {
+        const btnDelete = document.createElement("button");
+        btnDelete.className = "danger";
+        btnDelete.textContent = "Supprimer";
+        btnDelete.addEventListener("click", async () => {
+          if (!confirm(`Supprimer le profil « ${p.id} » ?`)) return;
+          try {
+            await window.routing.deleteProfile(p.id);
+            await refreshProfiles();
+          } catch (err) {
+            profilesMsg.textContent = err.message;
+          }
+        });
+        li.appendChild(btnDelete);
+      }
+    }
+
+    profilesList.appendChild(li);
+  }
 }
 
 document.getElementById("btn-start").addEventListener("click", async () => {
@@ -79,6 +142,25 @@ document.getElementById("btn-blackout").addEventListener("click", async () => {
 
 document.getElementById("btn-refresh-monitor").addEventListener("click", refreshMonitor);
 document.getElementById("btn-reload-config").addEventListener("click", loadConfigEditor);
+document.getElementById("btn-refresh-profiles").addEventListener("click", refreshProfiles);
+
+document.getElementById("btn-create-profile").addEventListener("click", async () => {
+  const id = document.getElementById("profile-id").value.trim();
+  const label = document.getElementById("profile-label").value.trim();
+  if (!id) {
+    profilesMsg.textContent = "Identifiant requis";
+    return;
+  }
+  try {
+    await window.routing.createProfile({ id, label: label || id });
+    document.getElementById("profile-id").value = "";
+    document.getElementById("profile-label").value = "";
+    await refreshProfiles();
+  } catch (err) {
+    profilesMsg.textContent = err.message;
+  }
+});
+
 document.getElementById("btn-save-config").addEventListener("click", async () => {
   try {
     const config = JSON.parse(configEditor.value);
@@ -96,6 +178,7 @@ document.getElementById("btn-save-config").addEventListener("click", async () =>
 
 loadUniverses();
 loadConfigEditor();
+refreshProfiles();
 refreshStatus();
 setInterval(refreshStatus, 1000);
 setInterval(() => {

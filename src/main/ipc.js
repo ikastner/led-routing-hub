@@ -15,6 +15,11 @@ function setupIpc(engine) {
   ipcMain.handle("engine:wall-bands", () => engine.getWallBands());
   ipcMain.handle("engine:export-wall-bands", (_evt, outPath) => engine.exportWallBands(outPath));
   ipcMain.handle("engine:start-config-api", async (_evt, options) => engine.startConfigApi(options));
+  ipcMain.handle("engine:profiles:list", () => engine.listProfiles());
+  ipcMain.handle("engine:profiles:active", () => engine.getActiveProfile());
+  ipcMain.handle("engine:profiles:activate", async (_evt, id) => engine.activateProfile(id));
+  ipcMain.handle("engine:profiles:create", (_evt, input) => engine.createProfile(input));
+  ipcMain.handle("engine:profiles:delete", (_evt, id) => engine.deleteProfile(id));
 }
 
 module.exports = { setupIpc };

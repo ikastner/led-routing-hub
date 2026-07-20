@@ -15,6 +15,7 @@
   <nav class="tabs">
     <button class="tab active" data-tab="dashboard">Dashboard</button>
     <button class="tab" data-tab="monitor">Moniteur DMX</button>
+    <button class="tab" data-tab="profiles">Profils</button>
     <button class="tab" data-tab="config">Configuration</button>
   </nav>
 
@@ -43,9 +44,25 @@
       </div>
     </section>
 
+    <section id="profiles" class="panel">
+      <div class="card">
+        <h2>Profils d’installation</h2>
+        <p class="hint">Un seul profil actif. Studio / Unity lisent son <code>wall-bands</code> via l’API :6456.</p>
+        <div class="row">
+          <input id="profile-id" placeholder="id (ex: salle-b)" />
+          <input id="profile-label" placeholder="Label (optionnel)" />
+          <button id="btn-create-profile">Créer</button>
+          <button id="btn-refresh-profiles">Rafraîchir</button>
+        </div>
+        <p id="profiles-msg" class="errors"></p>
+        <ul id="profiles-list" class="profiles-list"></ul>
+      </div>
+    </section>
+
     <section id="config" class="panel">
       <div class="card">
-        <h2>Configuration P1</h2>
+        <h2>Configuration JSON (avancé)</h2>
+        <p id="config-profile-label" class="hint"></p>
         <div class="row">
           <button id="btn-reload-config">Recharger</button>
           <button id="btn-save-config">Enregistrer</button>

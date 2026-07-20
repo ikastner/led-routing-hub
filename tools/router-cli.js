@@ -8,6 +8,12 @@ const { startWatchdog } = require("../src/core/watchdog");
 const { blackoutAll } = require("../src/core/blackout");
 const { STATE_PORT } = require("../src/core/protocol");
 const { createConfigServer, CONFIG_API_PORT } = require("../src/core/configServer");
+const {
+  ensureMigrated,
+  setActiveProfile,
+  getActiveProfile,
+  listProfiles,
+} = require("../src/core/profiles");
 
 function parseArgs(argv) {
   const args = {
@@ -16,6 +22,7 @@ function parseArgs(argv) {
     dryRun: false,
     watchdogMs: 2000,
     configPort: CONFIG_API_PORT,
+    profile: null,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
@@ -23,6 +30,7 @@ function parseArgs(argv) {
     else if (arg === "--hz" && argv[i + 1]) args.hz = parseFloat(argv[++i]);
     else if (arg === "--watchdog" && argv[i + 1]) args.watchdogMs = parseInt(argv[++i], 10);
     else if (arg === "--config-port" && argv[i + 1]) args.configPort = parseInt(argv[++i], 10);
+    else if (arg === "--profile" && argv[i + 1]) args.profile = argv[++i];
     else if (arg === "--dry-run") args.dryRun = true;
     else if (arg === "--help" || arg === "-h") args.help = true;
   }
@@ -33,10 +41,22 @@ async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
     console.log(
-      "Usage: node tools/router-cli.js [--port 6455] [--config-port 6456] [--hz 40] [--dry-run]",
+      "Usage: node tools/router-cli.js [--profile default] [--port 6455] [--config-port 6456] [--hz 40] [--dry-run]",
     );
+    ensureMigrated();
+    console.log("\nProfils :");
+    for (const p of listProfiles()) {
+      console.log(`  ${p.active ? "*" : " "} ${p.id} — ${p.label}`);
+    }
     return;
   }
+
+  ensureMigrated();
+  if (args.profile) {
+    setActiveProfile(args.profile);
+  }
+  const active = getActiveProfile();
+  console.log(`[router] profil actif : ${active.id} (${active.label})`);
 
   const config = loadConfig();
   printInstallInfo(config);
@@ -47,8 +67,8 @@ async function main() {
   const configServer = createConfigServer(() => ({
     running: true,
     statePort: args.port,
-    profileId: "default",
-    profileLabel: "default",
+    profileId: active.id,
+    profileLabel: active.label,
     getConfig: () => config,
   }));
   await configServer.start({ port: args.configPort });

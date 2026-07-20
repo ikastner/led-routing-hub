@@ -14,4 +14,9 @@ contextBridge.exposeInMainWorld("routing", {
   getWallBands: () => ipcRenderer.invoke("engine:wall-bands"),
   exportWallBands: (outPath) => ipcRenderer.invoke("engine:export-wall-bands", outPath),
   startConfigApi: (options) => ipcRenderer.invoke("engine:start-config-api", options),
+  listProfiles: () => ipcRenderer.invoke("engine:profiles:list"),
+  getActiveProfile: () => ipcRenderer.invoke("engine:profiles:active"),
+  activateProfile: (id) => ipcRenderer.invoke("engine:profiles:activate", id),
+  createProfile: (input) => ipcRenderer.invoke("engine:profiles:create", input),
+  deleteProfile: (id) => ipcRenderer.invoke("engine:profiles:delete", id),
 });

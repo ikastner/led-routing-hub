@@ -2,15 +2,19 @@
 
 const path = require("path");
 const { loadConfig } = require("../src/core/config");
-const { WALL_BANDS_PATH } = require("../src/core/paths");
+const { ensureMigrated, getActiveProfile } = require("../src/core/profiles");
 const { deriveAndWriteWallBands } = require("../src/core/wallBands");
 
 function main() {
-  const out = process.argv[2] ?? WALL_BANDS_PATH;
+  ensureMigrated();
+  const active = getActiveProfile();
+  const out = process.argv[2] ?? active.wallBandsPath;
   const config = loadConfig();
   const wallBands = deriveAndWriteWallBands(config, out, {
-    generatedFrom: config.generatedFrom ?? "config/mur-led.json",
+    profile: active.id,
+    generatedFrom: config.generatedFrom ?? active.configPath,
   });
+  console.log(`Profil actif : ${active.id}`);
   console.log(`Écrit ${path.resolve(out)}`);
   console.log(`  columns=${wallBands.columns}, bands=${wallBands.bands.length}`);
   const entities = wallBands.bands.reduce((sum, b) => sum + b.entityCount, 0);

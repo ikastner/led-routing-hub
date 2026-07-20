@@ -116,3 +116,61 @@ pre {
 }
 
 .dmx-cell span { opacity: 0.7; }
+
+.hint {
+  color: #9aa;
+  font-size: 0.85rem;
+  margin: 0 0 0.75rem;
+}
+
+.profiles-list {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.profiles-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #333;
+  border-radius: 6px;
+  margin-bottom: 0.5rem;
+}
+
+.profiles-list li.active {
+  border-color: #4a9;
+  background: #1a2a22;
+}
+
+.profiles-list .meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.profiles-list .meta strong {
+  display: block;
+}
+
+.profiles-list .meta span {
+  color: #888;
+  font-size: 0.8rem;
+}
+
+.profiles-list .badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #4a9;
+}
+
+#profile-id,
+#profile-label {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #eee;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  min-width: 8rem;
+}

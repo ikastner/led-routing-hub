@@ -7,14 +7,30 @@ const { startSenderLoop } = require("../src/core/senderLoop");
 const { startWatchdog } = require("../src/core/watchdog");
 const { blackoutAll } = require("../src/core/blackout");
 const { STATE_PORT } = require("../src/core/protocol");
+const { createConfigServer, CONFIG_API_PORT } = require("../src/core/configServer");
+const {
+  ensureMigrated,
+  setActiveProfile,
+  getActiveProfile,
+  listProfiles,
+} = require("../src/core/profiles");
 
 function parseArgs(argv) {
-  const args = { port: STATE_PORT, hz: 40, dryRun: false, watchdogMs: 2000 };
+  const args = {
+    port: STATE_PORT,
+    hz: 40,
+    dryRun: false,
+    watchdogMs: 2000,
+    configPort: CONFIG_API_PORT,
+    profile: null,
+  };
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
     if (arg === "--port" && argv[i + 1]) args.port = parseInt(argv[++i], 10);
     else if (arg === "--hz" && argv[i + 1]) args.hz = parseFloat(argv[++i]);
     else if (arg === "--watchdog" && argv[i + 1]) args.watchdogMs = parseInt(argv[++i], 10);
+    else if (arg === "--config-port" && argv[i + 1]) args.configPort = parseInt(argv[++i], 10);
+    else if (arg === "--profile" && argv[i + 1]) args.profile = argv[++i];
     else if (arg === "--dry-run") args.dryRun = true;
     else if (arg === "--help" || arg === "-h") args.help = true;
   }
@@ -24,15 +40,38 @@ function parseArgs(argv) {
 async function main() {
   const args = parseArgs(process.argv.slice(2));
   if (args.help) {
-    console.log("Usage: node tools/router-cli.js [--port 6455] [--hz 40] [--dry-run]");
+    console.log(
+      "Usage: node tools/router-cli.js [--profile default] [--port 6455] [--config-port 6456] [--hz 40] [--dry-run]",
+    );
+    ensureMigrated();
+    console.log("\nProfils :");
+    for (const p of listProfiles()) {
+      console.log(`  ${p.active ? "*" : " "} ${p.id} — ${p.label}`);
+    }
     return;
   }
+
+  ensureMigrated();
+  if (args.profile) {
+    setActiveProfile(args.profile);
+  }
+  const active = getActiveProfile();
+  console.log(`[router] profil actif : ${active.id} (${active.label})`);
 
   const config = loadConfig();
   printInstallInfo(config);
 
   const bufferManager = createBufferManager(config);
   console.log(`\n[router] ${bufferManager.size} buffers DMX`);
+
+  const configServer = createConfigServer(() => ({
+    running: true,
+    statePort: args.port,
+    profileId: active.id,
+    profileLabel: active.label,
+    getConfig: () => config,
+  }));
+  await configServer.start({ port: args.configPort });
 
   const receiver = startStateReceiver(bufferManager, { port: args.port });
   await receiver.ready;
@@ -41,6 +80,7 @@ async function main() {
   const watchdog = startWatchdog(bufferManager, receiver, { timeoutMs: args.watchdogMs });
 
   console.log(`[router] actif — lancez le faker : npm run faker`);
+  console.log(`[router] authoring sync : curl http://127.0.0.1:${args.configPort}/api/wall-bands`);
   console.log(`[router] Ctrl+C pour arrêter\n`);
 
   let stopping = false;
@@ -51,6 +91,7 @@ async function main() {
     watchdog.stop();
     sender.stop();
     receiver.stop();
+    configServer.stop();
     if (!args.dryRun) {
       try {
         await blackoutAll(config, { repeat: 8, hz: 40 });

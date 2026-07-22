@@ -16,6 +16,8 @@ function startWatchdog(bufferManager, receiver, { timeoutMs = 2000, checkEveryMs
     if (elapsed >= timeoutMs) {
       if (!blackoutActive) {
         bufferManager.blackoutAll();
+        // Session authoring interrompue : le prochain flux peut repartir à frameId=0.
+        receiver.resetFrameCounters?.();
         blackoutActive = true;
         console.warn(`[watchdog] aucun paquet depuis ${(elapsed / 1000).toFixed(1)}s → blackout`);
       }

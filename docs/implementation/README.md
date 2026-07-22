@@ -10,3 +10,4 @@ Chaque nouveau plan est ajouté ici (un fichier Markdown par plan).
 |---------|--------|
 | [plan-installation-et-profils.md](./plan-installation-et-profils.md) | Multi-profils, Excel, `wall-bands`, UI, **API HTTP config** |
 | [contrat-authoring.md](./contrat-authoring.md) | Contrat Hub ↔ authoring (fichier + API) |
+| [perf-hotpath.md](./perf-hotpath.md) | Optim hot path LEDS→ArtNet (lookup O(1), sender in-place) |

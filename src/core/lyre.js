@@ -19,7 +19,10 @@ const CHANNELS = {
 
 const CHANNEL_COUNT = 14;
 const DIMMER_FULL = 255;
+/** Valeur authoring « shutter ouvert » (Unity / faker). Sur beaucoup de lyres, 40 = strobe. */
 const SHUTTER_OPEN = 40;
+/** Valeur DMX « open / no strobe » envoyée au fixture. */
+const SHUTTER_DMX_OPEN = 255;
 const CENTER = 128;
 
 const DANGEROUS_OFFSETS = new Set([
@@ -40,6 +43,19 @@ const COLOR_WHEEL_PRESETS = {
   blue: 160,
 };
 
+/**
+ * Mappe le shutter authoring → DMX fixture.
+ * Beaucoup de lyres : 0 = fermé, 1–127 ≈ strobe, 128–255 = open.
+ * Authoring envoie 40 pour « ouvert » → on force 255.
+ */
+function mapAuthoringShutterToDmx(shutter) {
+  const s = (shutter ?? 0) & 0xff;
+  if (s === 0) return 0;
+  // Zone « open authoring » / bas (évite le strobe hardware)
+  if (s > 0 && s <= 127) return SHUTTER_DMX_OPEN;
+  return s;
+}
+
 module.exports = {
   CHANNELS,
   CHANNEL_COUNT,
@@ -47,5 +63,7 @@ module.exports = {
   COLOR_WHEEL_PRESETS,
   DIMMER_FULL,
   SHUTTER_OPEN,
+  SHUTTER_DMX_OPEN,
   CENTER,
+  mapAuthoringShutterToDmx,
 };

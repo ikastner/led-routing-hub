@@ -1,7 +1,6 @@
 /**
-Gère la réception des états des entités LED et des devices par UDP et les diffuse sur le bufferManager
-pour être utilisés par le reste de l'application pour la gestion des états des entités LED et des devices.
-**/
+ * Réception UDP LEDS + DEVS → bufferManager.
+ */
 
 const dgram = require("dgram");
 const {
@@ -11,28 +10,17 @@ const {
   isNewerFrame,
   isSameOrNewerFrame,
   readMagic,
-  decodeLedsChunk,
+  parseLedsChunkHeader,
+  applyLedsChunkColors,
   decodeDevsState,
 } = require("./protocol");
 
 /**
  * Silence au-delà de ce seuil = nouvelle session authoring.
- * Les studios / Unity repartent souvent à frameId=0 après Stop → Preview ;
- * sans reset, le hub rejetterait ces trames comme obsolètes.
  * 250 ms >> intervalle 40 Hz (~25 ms), << watchdog blackout (2 s).
  */
 const SESSION_GAP_MS = 250;
 
-/**  
-  @description : Démarre le receiver des états des entités LED et des devices par UDP et les diffuse sur le bufferManager pour être 
-  utilisés par le reste de l'application pour la gestion des états des entités LED et des devices.
- * @param {BufferManager} bufferManager - Le bufferManager pour stocker les états des entités LED et des devices.
- * @param {Object} options - Les options pour le receiver.
- * @param {number} options.port - Le port UDP pour la réception des états des entités LED et des devices.
- * @param {number} options.sessionGapMs - Silence (ms) avant reset des compteurs frameId.
- * @param {Function} options.onStats - La fonction pour émettre les statistiques.
- * @returns {Object} - L'objet de retour contenant la promesse de prêt et les méthodes pour arrêter le receiver.
- */
 function startStateReceiver(
   bufferManager,
   { port = STATE_PORT, sessionGapMs = SESSION_GAP_MS, onStats } = {},
@@ -68,7 +56,7 @@ function startStateReceiver(
     const now = Date.now();
     if (now - lastLogAt < 1000) return;
     console.log(
-      `[receiver] ${packetCount} pkt/s | LED frame=${ledFrameId ?? "-"} (${ledApplied}) | DEVS frame=${deviceFrameId ?? "-"} (${deviceApplied})`
+      `[receiver] ${packetCount} pkt/s | LED frame=${ledFrameId ?? "-"} (${ledApplied}) | DEVS frame=${deviceFrameId ?? "-"} (${deviceApplied})`,
     );
     packetCount = 0;
     ledApplied = 0;
@@ -78,20 +66,18 @@ function startStateReceiver(
   }
 
   function handleLeds(buffer) {
-    const chunk = decodeLedsChunk(buffer);
-    if (!isSameOrNewerFrame(chunk.frameId, ledFrameId)) return;
+    const meta = parseLedsChunkHeader(buffer);
+    if (!isSameOrNewerFrame(meta.frameId, ledFrameId)) return;
 
-    if (ledFrameId == null || isNewerFrame(chunk.frameId, ledFrameId)) {
-      ledFrameId = chunk.frameId;
+    if (ledFrameId == null || isNewerFrame(meta.frameId, ledFrameId)) {
+      ledFrameId = meta.frameId;
     }
 
-    for (let i = 0; i < chunk.colors.length; i += 1) {
-      const entityId = chunk.startEntityId + i;
-      const { r, g, b } = chunk.colors[i];
+    applyLedsChunkColors(buffer, meta.startEntityId, meta.entryCount, (entityId, r, g, b) => {
       if (bufferManager.setEntityColor(entityId, r, g, b)) {
         ledApplied += 1;
       }
-    }
+    });
   }
 
   function handleDevs(buffer) {
@@ -127,8 +113,6 @@ function startStateReceiver(
 
   sock.on("message", (buffer) => {
     const now = Date.now();
-    // Nouvelle session authoring (Stop puis Preview / relance Unity) →
-    // accepter un frameId qui repart à 0.
     if (now - lastPacketAt >= sessionGapMs) {
       resetFrameCounters();
     }

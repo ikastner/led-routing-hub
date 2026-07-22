@@ -101,6 +101,60 @@ function decodeLedsChunk(buffer) {
   return { frameId, chunkIndex, chunkCount, startEntityId, entryCount, colors };
 }
 
+/**
+ * Parse le header LEDS sans allouer le tableau colors (hot path receiver).
+ * @returns {{ frameId, chunkIndex, chunkCount, startEntityId, entryCount }}
+ */
+function parseLedsChunkHeader(buffer) {
+  if (buffer.length < LED_HEADER_SIZE) {
+    throw new Error(`LEDS trop court (${buffer.length} octets)`);
+  }
+  if (readMagic(buffer) !== LED_MAGIC) {
+    throw new Error("Magic LEDS invalide");
+  }
+  if (buffer.readUInt8(4) !== VERSION) {
+    throw new Error("Version LEDS non supportée");
+  }
+
+  const frameId = buffer.readUInt16LE(5);
+  const chunkIndex = buffer.readUInt8(7);
+  const chunkCount = buffer.readUInt8(8);
+  const startEntityId = buffer.readUInt16LE(9);
+  const entryCount = buffer.readUInt16LE(11);
+  const expected = LED_HEADER_SIZE + entryCount * LED_ENTRY_SIZE;
+  if (buffer.length < expected) {
+    throw new Error(`LEDS incomplet : attendu ${expected}, reçu ${buffer.length}`);
+  }
+
+  return { frameId, chunkIndex, chunkCount, startEntityId, entryCount };
+}
+
+/**
+ * Applique les RGB du datagramme via callback, sans objets {r,g,b}.
+ * @param {Buffer} buffer
+ * @param {(entityId: number, r: number, g: number, b: number) => void} onColor
+ * @returns {header meta}
+ */
+function applyLedsChunk(buffer, onColor) {
+  const meta = parseLedsChunkHeader(buffer);
+  applyLedsChunkColors(buffer, meta.startEntityId, meta.entryCount, onColor);
+  return meta;
+}
+
+/** Corps RGB uniquement (header déjà validé via parseLedsChunkHeader). */
+function applyLedsChunkColors(buffer, startEntityId, entryCount, onColor) {
+  let offset = LED_HEADER_SIZE;
+  for (let i = 0; i < entryCount; i += 1) {
+    onColor(
+      startEntityId + i,
+      buffer.readUInt8(offset),
+      buffer.readUInt8(offset + 1),
+      buffer.readUInt8(offset + 2),
+    );
+    offset += LED_ENTRY_SIZE;
+  }
+}
+
 
 // Encode un chunk de DEVS
 // Retourne un buffer contenant le chunk encodé exemple : Buffer.from([0x44, 0x45, 0x56, 0x53, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00])
@@ -240,6 +294,9 @@ module.exports = {
   readMagic,
   encodeLedsChunk,
   decodeLedsChunk,
+  parseLedsChunkHeader,
+  applyLedsChunk,
+  applyLedsChunkColors,
   encodeDevsState,
   decodeDevsState,
   getLedEntityRanges,

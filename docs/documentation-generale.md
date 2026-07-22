@@ -79,7 +79,7 @@ led-routing-hub/
 | `config.js` | Charge/valide/sauvegarde `mur-led.json` |
 | `artnet.js` | Construit et envoie les paquets Art-Net ArtDmx |
 | `senderLoop.js` | Boucle 40 Hz : envoie les univers modifiés en ArtNet |
-| `senderWorker.js` | Thread worker pour l’envoi UDP (ne bloque pas le main) |
+| `senderLoop.js` | Envoi ArtNet 40 Hz (même process, paquets préalloués) |
 | `watchdog.js` | Blackout automatique si plus de paquets state |
 | `blackout.js` | Extinction globale de tous les univers |
 | `lyre.js` | Constantes DMX des lyres (14 canaux, presets) |
@@ -190,7 +190,7 @@ Au total : ~130 buffers (4 contrôleurs × ~32 univers chacun).
 
 1. Récupère les univers **dirty** (modifiés depuis le dernier envoi)
 2. Tous les **10 ticks**, force l’envoi de **tous** les univers (filet de sécurité)
-3. Délègue l’envoi UDP au **worker thread** (`senderWorker.js`)
+3. Envoie l’UDP ArtNet depuis le **même process** (`senderLoop.js`, paquets préalloués)
 
 Chaque paquet = en-tête Art-Net + jusqu’à 512 valeurs DMX.
 
@@ -346,7 +346,7 @@ Défini dans `src/core/lyre.js` — offsets relatifs au `dmxChannelStart` :
 | 2 | tilt | Tilt coarse |
 | 3 | tiltFine | Tilt fine |
 | 4 | dimmer | Intensité (255 = full) |
-| 5 | shutter | 40 = ouvert |
+| 5 | shutter | Authoring `40` = ouvert → Hub envoie **255** DMX (évite strobe) |
 | 6 | colorWheel | Roue couleur |
 | 7 | r | Rouge |
 | 8–13 | g, b, aux… | Certains marqués « dangereux » (forcés à 0 à l’écriture) |
@@ -354,7 +354,7 @@ Défini dans `src/core/lyre.js` — offsets relatifs au `dmxChannelStart` :
 Constantes utiles :
 
 - `DIMMER_FULL = 255`
-- `SHUTTER_OPEN = 40`
+- `SHUTTER_OPEN = 40` (authoring) → mappé en `SHUTTER_DMX_OPEN = 255` sur le fixture
 - `CENTER = 128` (position neutre pan/tilt)
 
 ---

@@ -83,6 +83,7 @@ LEDS         v1  fid=5     c0/1  e100  n=3   R G B     R G B     R G B
 - **`frameId` séparés** : le routing suit un compteur pour `LEDS` et un autre pour `DEVS`. Ils peuvent différer dans la même période 40 Hz.
 - **Chunks d’une même trame** : tous les paquets `LEDS` avec le même `frameId` sont acceptés (ex. chunks 0…49 d’une frame). Seuls les paquets dont le `frameId` est **strictement plus ancien** sont ignorés.
 - **Wrap-around** : comparaison modulo 65536 (un `frameId` proche de 0 est considéré plus récent que 65535).
+- **Nouvelle session** : après un silence ≥ **250 ms** (ou blackout watchdog), les compteurs `frameId` sont remis à zéro. Ainsi Stop → Preview / relance Unity qui repart à `frameId=0` est accepté immédiatement.
 - **Pas de validation d’ordre** : le receiver applique les paquets à l’arrivée ; il ne vérifie ni l’ordre des chunks ni qu’ils sont tous présents.
 - **Version** : seule la version `1` est acceptée ; magic ou taille invalide → paquet ignoré (log d’erreur).
 

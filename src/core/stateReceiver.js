@@ -15,16 +15,28 @@ const {
   decodeDevsState,
 } = require("./protocol");
 
+/**
+ * Silence au-delà de ce seuil = nouvelle session authoring.
+ * Les studios / Unity repartent souvent à frameId=0 après Stop → Preview ;
+ * sans reset, le hub rejetterait ces trames comme obsolètes.
+ * 250 ms >> intervalle 40 Hz (~25 ms), << watchdog blackout (2 s).
+ */
+const SESSION_GAP_MS = 250;
+
 /**  
   @description : Démarre le receiver des états des entités LED et des devices par UDP et les diffuse sur le bufferManager pour être 
   utilisés par le reste de l'application pour la gestion des états des entités LED et des devices.
  * @param {BufferManager} bufferManager - Le bufferManager pour stocker les états des entités LED et des devices.
  * @param {Object} options - Les options pour le receiver.
  * @param {number} options.port - Le port UDP pour la réception des états des entités LED et des devices.
+ * @param {number} options.sessionGapMs - Silence (ms) avant reset des compteurs frameId.
  * @param {Function} options.onStats - La fonction pour émettre les statistiques.
  * @returns {Object} - L'objet de retour contenant la promesse de prêt et les méthodes pour arrêter le receiver.
  */
-function startStateReceiver(bufferManager, { port = STATE_PORT, onStats } = {}) {
+function startStateReceiver(
+  bufferManager,
+  { port = STATE_PORT, sessionGapMs = SESSION_GAP_MS, onStats } = {},
+) {
   const sock = dgram.createSocket("udp4");
   let lastPacketAt = Date.now();
   let ledFrameId = null;
@@ -33,6 +45,11 @@ function startStateReceiver(bufferManager, { port = STATE_PORT, onStats } = {}) 
   let ledApplied = 0;
   let deviceApplied = 0;
   let lastLogAt = Date.now();
+
+  function resetFrameCounters() {
+    ledFrameId = null;
+    deviceFrameId = null;
+  }
 
   function emitStats() {
     const stats = {
@@ -109,7 +126,13 @@ function startStateReceiver(bufferManager, { port = STATE_PORT, onStats } = {}) 
   }
 
   sock.on("message", (buffer) => {
-    lastPacketAt = Date.now();
+    const now = Date.now();
+    // Nouvelle session authoring (Stop puis Preview / relance Unity) →
+    // accepter un frameId qui repart à 0.
+    if (now - lastPacketAt >= sessionGapMs) {
+      resetFrameCounters();
+    }
+    lastPacketAt = now;
     packetCount += 1;
 
     try {
@@ -129,18 +152,27 @@ function startStateReceiver(bufferManager, { port = STATE_PORT, onStats } = {}) 
 
   const bindPromise = new Promise((resolve, reject) => {
     sock.bind(port, () => {
-      console.log(`[receiver] écoute UDP :${port} (LEDS + DEVS)`);
-      resolve();
+      const addr = sock.address();
+      console.log(`[receiver] écoute UDP :${addr.port} (LEDS + DEVS)`);
+      resolve(addr);
     });
     sock.once("error", reject);
   });
 
   return {
     ready: bindPromise,
+    getPort() {
+      try {
+        return sock.address().port;
+      } catch {
+        return null;
+      }
+    },
     getLastPacketAt() {
       return lastPacketAt;
     },
     getStats: emitStats,
+    resetFrameCounters,
     stop() {
       sock.close();
     },
@@ -148,5 +180,6 @@ function startStateReceiver(bufferManager, { port = STATE_PORT, onStats } = {}) 
 }
 
 module.exports = {
+  SESSION_GAP_MS,
   startStateReceiver,
 };

@@ -27,5 +27,8 @@ npm run faker                 # autre terminal
 ## Hors scope
 
 - Protocole delta LEDS (authoring)
-- Optim `led-editor` / Studio
 - Benchmarks CI
+
+## Suite authoring
+
+Voir `led-editor/LED/Docs/perf-state-exporter.md` (buffers préalloués + horloge Unity).

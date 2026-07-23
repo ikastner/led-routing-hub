@@ -39,6 +39,7 @@ npm test
 ## Documentation
 
 - **[docs/documentation-generale.md](docs/documentation-generale.md)** — vue d’ensemble du projet, architecture, modules, config, workflows
+- **[docs/architecture-code.md](docs/architecture-code.md)** — carte du code, hot path, APIs des modules
 - [docs/protocole-state.md](docs/protocole-state.md) — contrat réseau authoring ↔ routing (LEDS + DEVS)
 - [docs/implementation/](docs/implementation/) — plans d’implémentation (profils, sync authoring, API)
 - [Politique IA (équipe projet)](../POLITIQUE-IA.md) — gouvernance usage IA, données, revue, divulgation

@@ -9,6 +9,7 @@
     "faker": "node tools/faker.js",
     "test-led": "node tools/test-led.js",
     "parse": "node tools/parse-ecran.js",
+    "create:viewport": "node tools/create-viewport-profile.js",
     "export:wall-bands": "node tools/export-wall-bands.js",
     "sniffer": "node tools/sniffer.js",
     "test": "node --test tests/*.test.js",

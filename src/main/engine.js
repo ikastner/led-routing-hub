@@ -249,14 +249,29 @@ class RoutingEngine {
   }
 
   /**
-   * Active un profil. Si le moteur tourne : stop (blackout) + restart avec la nouvelle config.
+   * Active un profil. Blackout du mur (ancienne config) avant bascule —
+   * évite les fantômes hors viewport (ex. 128 → 32 centré).
+   * Si le moteur tourne : stop + restart avec la nouvelle config.
    */
   async activateProfile(profileId) {
     const wasRunning = this.running;
     const savedOptions = { ...this.options };
+    const previousConfig = this.config ?? (() => {
+      try {
+        return loadConfig();
+      } catch {
+        return null;
+      }
+    })();
 
     if (wasRunning) {
       await this.stop();
+    } else if (previousConfig && !savedOptions.dryRun) {
+      try {
+        await blackoutAll(previousConfig, { repeat: 5, hz: 40 });
+      } catch (_) {
+        /* ignore */
+      }
     }
 
     const active = setActiveProfile(profileId);

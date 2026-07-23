@@ -1,0 +1,172 @@
+{
+  "columns": 32,
+  "bands": [
+    {
+      "column": 0,
+      "entityStart": 7500,
+      "entityCount": 170
+    },
+    {
+      "column": 1,
+      "entityStart": 7670,
+      "entityCount": 89
+    },
+    {
+      "column": 2,
+      "entityStart": 7800,
+      "entityCount": 170
+    },
+    {
+      "column": 3,
+      "entityStart": 7970,
+      "entityCount": 89
+    },
+    {
+      "column": 4,
+      "entityStart": 8100,
+      "entityCount": 170
+    },
+    {
+      "column": 5,
+      "entityStart": 8270,
+      "entityCount": 89
+    },
+    {
+      "column": 6,
+      "entityStart": 8400,
+      "entityCount": 170
+    },
+    {
+      "column": 7,
+      "entityStart": 8570,
+      "entityCount": 89
+    },
+    {
+      "column": 8,
+      "entityStart": 8700,
+      "entityCount": 170
+    },
+    {
+      "column": 9,
+      "entityStart": 8870,
+      "entityCount": 89
+    },
+    {
+      "column": 10,
+      "entityStart": 9000,
+      "entityCount": 170
+    },
+    {
+      "column": 11,
+      "entityStart": 9170,
+      "entityCount": 89
+    },
+    {
+      "column": 12,
+      "entityStart": 9300,
+      "entityCount": 170
+    },
+    {
+      "column": 13,
+      "entityStart": 9470,
+      "entityCount": 89
+    },
+    {
+      "column": 14,
+      "entityStart": 9600,
+      "entityCount": 170
+    },
+    {
+      "column": 15,
+      "entityStart": 9770,
+      "entityCount": 89
+    },
+    {
+      "column": 16,
+      "entityStart": 10100,
+      "entityCount": 170
+    },
+    {
+      "column": 17,
+      "entityStart": 10270,
+      "entityCount": 89
+    },
+    {
+      "column": 18,
+      "entityStart": 10400,
+      "entityCount": 170
+    },
+    {
+      "column": 19,
+      "entityStart": 10570,
+      "entityCount": 89
+    },
+    {
+      "column": 20,
+      "entityStart": 10700,
+      "entityCount": 170
+    },
+    {
+      "column": 21,
+      "entityStart": 10870,
+      "entityCount": 89
+    },
+    {
+      "column": 22,
+      "entityStart": 11000,
+      "entityCount": 170
+    },
+    {
+      "column": 23,
+      "entityStart": 11170,
+      "entityCount": 89
+    },
+    {
+      "column": 24,
+      "entityStart": 11300,
+      "entityCount": 170
+    },
+    {
+      "column": 25,
+      "entityStart": 11470,
+      "entityCount": 89
+    },
+    {
+      "column": 26,
+      "entityStart": 11600,
+      "entityCount": 170
+    },
+    {
+      "column": 27,
+      "entityStart": 11770,
+      "entityCount": 89
+    },
+    {
+      "column": 28,
+      "entityStart": 11900,
+      "entityCount": 170
+    },
+    {
+      "column": 29,
+      "entityStart": 12070,
+      "entityCount": 89
+    },
+    {
+      "column": 30,
+      "entityStart": 12200,
+      "entityCount": 170
+    },
+    {
+      "column": 31,
+      "entityStart": 12370,
+      "entityCount": 89
+    }
+  ],
+  "generatedFrom": "viewport:salle-b:48-79",
+  "profile": "demo-32x32",
+  "visibleRows": 32,
+  "originRow": 48,
+  "physicalVisibleRows": 128,
+  "ascendingLastVisibleOffset": 128,
+  "descendingFirstVisibleOffset": 130
+}

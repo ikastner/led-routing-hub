@@ -26,17 +26,27 @@ function parseSheet(xml, sharedStrings) {
     const rowNum = parseInt(rowMatch[1], 10);
     const rowXml = rowMatch[2];
     const cells = {};
+    // Cellules avec <v> (shared string / number) ou inlineStr <is><t>
     const cellRe =
-      /<c r="([A-Z]+)(\d+)"([^>]*)>(?:<f[^>]*\/>|<f[^>]*>[^<]*<\/f>)?<v>([^<]*)<\/v>/g;
+      /<c r="([A-Z]+)(\d+)"([^>]*)>(?:<f[^>]*\/>|<f[^>]*>[^<]*<\/f>)?(?:<v>([^<]*)<\/v>|<is>\s*<t[^>]*>([^<]*)<\/t>\s*<\/is>)?/g;
     let cellMatch;
     while ((cellMatch = cellRe.exec(rowXml)) !== null) {
       const col = cellMatch[1];
-      const attrs = cellMatch[3];
-      const raw = cellMatch[4];
+      const attrs = cellMatch[3] ?? "";
+      const vRaw = cellMatch[4];
+      const inlineRaw = cellMatch[5];
       const t = attrs.match(/t="([^"]+)"/)?.[1];
-      let value = raw;
-      if (t === "s") value = sharedStrings[parseInt(raw, 10)] ?? raw;
-      else if (/^\d+(\.\d+)?$/.test(raw)) value = Number(raw);
+
+      let value;
+      if (inlineRaw != null) {
+        value = inlineRaw;
+      } else if (vRaw != null) {
+        if (t === "s") value = sharedStrings[parseInt(vRaw, 10)] ?? vRaw;
+        else if (/^\d+(\.\d+)?$/.test(vRaw)) value = Number(vRaw);
+        else value = vRaw;
+      } else {
+        continue;
+      }
       cells[col] = value;
     }
     rows.push({ rowNum, cells });
@@ -44,6 +54,19 @@ function parseSheet(xml, sharedStrings) {
   return rows;
 }
 
+function isDeviceName(name) {
+  const n = String(name || "").toLowerCase();
+  return (
+    n.includes("projector") ||
+    n.includes("projecteur") ||
+    n.includes("lyre")
+  );
+}
+
+/**
+ * Bandes RGB = lignes data avec entityStart/End/IP jusqu’à la 1re ligne device.
+ * Plus de borne fixe 2–129 : accepte Excel 128 ou viewport 32.
+ */
 function buildConfig(rows, { generatedFrom = "mapping/Ecran.xlsx" } = {}) {
   const controllers = [
     { ip: "192.168.1.45", label: "BC216-1", universeMin: 0, universeMax: 31, universeCount: 32 },
@@ -54,19 +77,53 @@ function buildConfig(rows, { generatedFrom = "mapping/Ecran.xlsx" } = {}) {
 
   const segments = [];
   let ehubOffset = 0;
+  const sorted = [...rows].sort((a, b) => a.rowNum - b.rowNum);
+  let pastRgb = false;
 
-  for (const row of rows) {
-    if (row.rowNum < 2 || row.rowNum > 129) continue;
-    const name = String(row.cells.A ?? row.rowNum - 1);
+  for (const row of sorted) {
+    if (row.rowNum < 2) continue;
+
+    const name = String(row.cells.A ?? "");
     const entityStart = Number(row.cells.B);
     const entityEnd = Number(row.cells.C);
-    const controllerIp = String(row.cells.D);
+    const controllerIp = String(row.cells.D ?? "");
     const universe = Number(row.cells.E);
+
+    if (isDeviceName(name)) {
+      pastRgb = true;
+      if (name.toLowerCase().includes("projector") || name.toLowerCase().includes("projecteur")) {
+        segments.push({
+          name: "Projector",
+          type: "rgbw",
+          channelsPerEntity: 4,
+          entityStart: 1,
+          entityEnd: 1,
+          entityCount: 1,
+          controllerIp: controllerIp || "192.168.1.48",
+          universe: Number.isFinite(universe) ? universe : 33,
+          dmxChannelStart: 1,
+          dmxChannelEnd: 4,
+        });
+      } else if (name.toLowerCase().includes("lyre")) {
+        segments.push({
+          name,
+          type: "moving_head",
+          channelsPerEntity: 14,
+          controllerIp: controllerIp || "192.168.1.48",
+          universe: Number.isFinite(universe) ? universe : 33,
+          dmxChannelStart: entityStart,
+          dmxChannelEnd: entityEnd,
+        });
+      }
+      continue;
+    }
+
+    if (pastRgb) continue;
     if (!entityStart || !entityEnd || !controllerIp) continue;
 
     const entityCount = entityEnd - entityStart + 1;
     segments.push({
-      name,
+      name: name || String(row.rowNum - 1),
       type: "rgb",
       channelsPerEntity: 3,
       entityStart,
@@ -81,45 +138,15 @@ function buildConfig(rows, { generatedFrom = "mapping/Ecran.xlsx" } = {}) {
     ehubOffset += entityCount;
   }
 
-  const deviceRows = rows.filter((r) => r.rowNum >= 130);
-  for (const row of deviceRows) {
-    const name = String(row.cells.A ?? "");
-    const b = Number(row.cells.B);
-    const c = Number(row.cells.C);
-    const controllerIp = String(row.cells.D ?? "192.168.1.48");
-    const universe = Number(row.cells.E ?? 33);
-
-    if (name.toLowerCase().includes("projector") || name.toLowerCase().includes("projecteur")) {
-      segments.push({
-        name: "Projector",
-        type: "rgbw",
-        channelsPerEntity: 4,
-        entityStart: 1,
-        entityEnd: 1,
-        entityCount: 1,
-        controllerIp,
-        universe,
-        dmxChannelStart: 1,
-        dmxChannelEnd: 4,
-      });
-    } else if (name.toLowerCase().includes("lyre")) {
-      segments.push({
-        name,
-        type: "moving_head",
-        channelsPerEntity: 14,
-        controllerIp,
-        universe,
-        dmxChannelStart: b,
-        dmxChannelEnd: c,
-      });
-    }
-  }
-
   const ledSegments = segments.filter((s) => s.type === "rgb");
+  const sizeHint = ledSegments.length;
   return {
     version: 1,
     generatedFrom,
-    description: "Mapping mur LED 128×128 + projecteur RGBW + 4 lyres (BC216)",
+    description:
+      sizeHint === 128
+        ? "Mapping mur LED 128×128 + projecteur RGBW + 4 lyres (BC216)"
+        : `Mapping mur LED viewport ${sizeHint} bandes + projecteur RGBW + lyres (BC216)`,
     controllers,
     segments,
     stats: {

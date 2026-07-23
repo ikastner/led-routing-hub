@@ -32,6 +32,22 @@ function murLedToWallBands(config, { profile = null, generatedFrom = null } = {}
   if (generatedFrom) result.generatedFrom = generatedFrom;
   if (profile) result.profile = profile;
 
+  // Viewport authoring (ex. profil 32×32 centré sur mur 128×128)
+  const vp = config.viewport;
+  if (vp && typeof vp === "object") {
+    if (vp.visibleRows != null) result.visibleRows = Number(vp.visibleRows);
+    if (vp.originRow != null) result.originRow = Number(vp.originRow);
+    if (vp.physicalVisibleRows != null) {
+      result.physicalVisibleRows = Number(vp.physicalVisibleRows);
+    }
+    if (vp.ascendingLastVisibleOffset != null) {
+      result.ascendingLastVisibleOffset = Number(vp.ascendingLastVisibleOffset);
+    }
+    if (vp.descendingFirstVisibleOffset != null) {
+      result.descendingFirstVisibleOffset = Number(vp.descendingFirstVisibleOffset);
+    }
+  }
+
   return result;
 }
 

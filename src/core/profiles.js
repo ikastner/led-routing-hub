@@ -7,6 +7,8 @@ const fs = require("fs");
 const path = require("path");
 const {
   PROJECT_ROOT,
+  BUNDLED_CONFIG_DIR,
+  CONFIG_DIR,
   PROFILES_DIR,
   ACTIVE_FILE,
   LEGACY_CONFIG_PATH,
@@ -18,6 +20,45 @@ const DEFAULT_PROFILE_ID = "default";
 
 function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
+}
+
+function copyDirRecursive(src, dest) {
+  ensureDir(dest);
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const from = path.join(src, entry.name);
+    const to = path.join(dest, entry.name);
+    if (entry.isDirectory()) copyDirRecursive(from, to);
+    else fs.copyFileSync(from, to);
+  }
+}
+
+function isPackagedElectron() {
+  if (!process.versions.electron) return false;
+  try {
+    const { app } = require("electron");
+    return Boolean(app?.isPackaged);
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * App packagée : copie la config du bundle vers userData au premier lancement.
+ * Ne s'applique pas à LED_CONFIG_DIR (tests / overrides).
+ */
+function seedBundledConfigIfNeeded() {
+  if (process.env.LED_CONFIG_DIR) return;
+  if (!isPackagedElectron()) return;
+  if (CONFIG_DIR === BUNDLED_CONFIG_DIR) return;
+  if (!fs.existsSync(BUNDLED_CONFIG_DIR)) return;
+
+  const profilesReady =
+    fs.existsSync(PROFILES_DIR) &&
+    fs.readdirSync(PROFILES_DIR, { withFileTypes: true }).some((d) => d.isDirectory());
+  if (profilesReady) return;
+
+  copyDirRecursive(BUNDLED_CONFIG_DIR, CONFIG_DIR);
+  console.log(`[profiles] seed config bundle → ${CONFIG_DIR}`);
 }
 
 function profileDir(profileId) {
@@ -92,6 +133,7 @@ function sanitizeProfileId(id) {
  * Idempotent.
  */
 function ensureMigrated() {
+  seedBundledConfigIfNeeded();
   ensureDir(PROFILES_DIR);
 
   const defaultConfigPath = getConfigPath(DEFAULT_PROFILE_ID);
